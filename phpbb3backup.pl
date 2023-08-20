@@ -5,7 +5,7 @@ my $MTDIR = "/var/www/html";
 my $BACKUPDIR = "/root/backups";
 my $TARCMD = "/bin/tar czf";
 my $SQLDUMPCMD = "/usr/bin/mysqldump";
-my $VERSION = "1.0.0";
+my $VERSION = "1.1.0";
 my $OPTION_FILE = "/root/.phpbackuprc";
 my $LATESTFILE = "$BACKUPDIR/phpbb3backup.sql-1";
 my $DOSNAPSHOT = 0;
@@ -13,6 +13,23 @@ my $MYSQLUSER = "";
 my $MYSQLPSWD = "";
 my $MYSQLDBNAME = "phpbb3";
 my $FORUMDIR = "/var/www/html";
+my $FILEEDITOR = $ENV{EDITOR};
+
+if ($FILEEDITOR eq "")
+{
+	$FILEEDITOR = "/usr/bin/nano";
+}
+
+my $templatefile = <<'END_TEMPLATE';
+# Put mysql user here
+phpbb3
+# Put mysql password here
+changeme
+# Put database name here
+phpbb3
+# Put the forum path here
+/var/www/html
+END_TEMPLATE
 
 # Get if they said a option
 my $CMDOPTION = shift;
@@ -22,11 +39,10 @@ sub ReadPrefs
 	my $LineCount = 0;
 	if (! -f $OPTION_FILE)
 	{
-		print "Unable to open '$OPTION_FILE'. Please create it with your mysql data in this format:\n";
-		print "First line - mysql user\nSecond line = mysql-password\nThird line = database name\nFourth line = forum folder\n";
-		print "--- Press Enter To Continue: ";
-		my $entered = <STDIN>;
-		exit 0;
+		open my $fh, '>', "$OPTION_FILE";
+		print ($fh $templatefile);
+		close($fh);
+		system("$FILEEDITOR $OPTION_FILE");
 	}
 
 	open(my $fh, '<:encoding(UTF-8)', $OPTION_FILE)
@@ -35,6 +51,11 @@ sub ReadPrefs
 	while (my $row = <$fh>)
 	{
 		chomp $row;
+		if (substr($row, 0, 1) eq "#")
+		{
+			# Skip comment lines
+			next;
+		}
 		if ($LineCount == 0)
 		{
 			$MYSQLUSER = $row;
