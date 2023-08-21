@@ -5,7 +5,7 @@ my $MTDIR = "/var/www/html";
 my $BACKUPDIR = "/root/backups";
 my $TARCMD = "/bin/tar czf";
 my $SQLDUMPCMD = "/usr/bin/mysqldump";
-my $VERSION = "1.1.0";
+my $VERSION = "1.3.0";
 my $OPTION_FILE = "/root/.phpbackuprc";
 my $LATESTFILE = "$BACKUPDIR/phpbb3backup.sql-1";
 my $DOSNAPSHOT = 0;
@@ -94,9 +94,9 @@ sub DumpMysql
 
 if (defined $CMDOPTION)
 {
-	if ($CMDOPTION ne "-snapshot")
+	if (($CMDOPTION ne "-snapshot") && ($CMDOPTION ne "-prefs"))
 	{
-		print "Unknown command line option: '$CMDOPTION'\nOnly allowed option is '-snapshot'\n";
+		print "Unknown command line option: '$CMDOPTION'\nOnly allowed options are '-snapshot' and '-prefs'\n";
 		exit 0;
 	}
 }
@@ -134,6 +134,20 @@ if ($DOSNAPSHOT == -1)
 	print "Running Manual Snapshot\n";
 }
 print "==============================\n";
+
+if ((defined $CMDOPTION) && ($CMDOPTION eq "-prefs"))
+{
+	# Edit the prefs file
+	print "Editing the prefs file\n";
+	if (! -f $OPTION_FILE)
+        {
+                open my $fh, '>', "$OPTION_FILE";
+                print ($fh $templatefile);
+                close($fh);
+        }
+	system("$FILEEDITOR $OPTION_FILE");
+	exit 0;
+}
 
 ReadPrefs();
 
