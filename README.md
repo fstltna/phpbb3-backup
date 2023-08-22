@@ -17,3 +17,9 @@ Creates a backup of your phpBB3 forum and mysql data
 6. If you want to edit the preferences use the "-prefs" command option
 
 If you need more help visit https://phpbbhosting.retro-os.live/
+
+# Change Log
+
+---
+
+20230821 - Cleaned up the code and conditionals
