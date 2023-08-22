@@ -5,9 +5,9 @@ my $MTDIR = "/var/www/html";
 my $BACKUPDIR = "/root/backups";
 my $TARCMD = "/bin/tar czf";
 my $SQLDUMPCMD = "/usr/bin/mysqldump";
-my $VERSION = "1.3.0";
+my $VERSION = "1.4.0";
 my $OPTION_FILE = "/root/.phpbackuprc";
-my $LATESTFILE = "$BACKUPDIR/phpbb3backup.sql-1";
+my $LATESTFILE = "$BACKUPDIR/phpbb3backup.mysql-1";
 my $DOSNAPSHOT = 0;
 my $MYSQLUSER = "";
 my $MYSQLPSWD = "";
@@ -60,22 +60,21 @@ sub ReadPrefs
 		{
 			$MYSQLUSER = $row;
 		}
-		if ($LineCount == 1)
+		elsif ($LineCount == 1)
 		{
 			$MYSQLPSWD = $row;
 		}
-		if ($LineCount == 2)
+		elsif ($LineCount == 2)
 		{
 			$MYSQLDBNAME = $row;
 		}
-		if ($LineCount == 3)
+		elsif ($LineCount == 3)
 		{
 			$FORUMDIR = $row;
 		}
 		$LineCount += 1;
 	}
 	close($fh);
-	# print "User = $MYSQLUSER, PSWD = $MYSQLPSWD\n";
 }
 
 sub DumpMysql
@@ -88,7 +87,7 @@ sub DumpMysql
 		unlink("$DUMPFILE");
 	}
 	# print "User = $MYSQLUSER, PSWD = $MYSQLPSWD\n";
-	system("$SQLDUMPCMD  --user=$MYSQLUSER --password=$MYSQLPSWD --result-file=$DUMPFILE $MYSQLDBNAME");
+	system("$SQLDUMPCMD --user=$MYSQLUSER --password=$MYSQLPSWD --result-file=$DUMPFILE $MYSQLDBNAME");
 	print "\n";
 }
 
@@ -110,12 +109,11 @@ sub SnapShotFunc
 	}
 	system("$TARCMD $BACKUPDIR/snapshot.tgz $MTDIR > /dev/null 2>\&1");
 	print "\nBackup Completed.\nBacking up MYSQL data: ";
-	if (-f "$BACKUPDIR/snapshot.sql")
+	if (-f "$BACKUPDIR/snapshot.mysql")
 	{
-		unlink("$BACKUPDIR/snapshot.sql");
+		unlink("$BACKUPDIR/snapshot.mysql");
 	}
-	# print "User = $MYSQLUSER, PSWD = $MYSQLPSWD\n";
-	DumpMysql("$BACKUPDIR/snapshot.sql");
+	DumpMysql("$BACKUPDIR/snapshot.mysql");
 	print "\n";
 }
 
@@ -128,7 +126,7 @@ if ((defined $CMDOPTION) && ($CMDOPTION eq "-snapshot"))
 	$DOSNAPSHOT = -1;
 }
 
-print "phpBB3Backup.pl version $VERSION\n";
+print "phpbb3backup.pl version $VERSION\n";
 if ($DOSNAPSHOT == -1)
 {
 	print "Running Manual Snapshot\n";
@@ -140,11 +138,11 @@ if ((defined $CMDOPTION) && ($CMDOPTION eq "-prefs"))
 	# Edit the prefs file
 	print "Editing the prefs file\n";
 	if (! -f $OPTION_FILE)
-        {
-                open my $fh, '>', "$OPTION_FILE";
-                print ($fh $templatefile);
-                close($fh);
-        }
+	{
+		open my $fh, '>', "$OPTION_FILE";
+		print ($fh $templatefile);
+		close($fh);
+	}
 	system("$FILEEDITOR $OPTION_FILE");
 	exit 0;
 }
@@ -166,47 +164,39 @@ print "Moving existing backups: ";
 
 if (-f "$BACKUPDIR/phpbb3backup-5.tgz")
 {
-	unlink("$BACKUPDIR/phpbb3backup-5.tgz")  or warn "Could not unlink $BACKUPDIR/phpbb3backup-5.tgz: $!";
+	unlink("$BACKUPDIR/phpbb3backup-5.tgz") or warn "Could not unlink $BACKUPDIR/phpbb3backup-5.tgz: $!";
 }
-if (-f "$BACKUPDIR/phpbb3backup-4.tgz")
+
+my $FileRevision = 4;
+
+while ($FileRevision > 0)
 {
-	rename("$BACKUPDIR/phpbb3backup-4.tgz", "$BACKUPDIR/phpbb3backup-5.tgz");
+	if (-f "$BACKUPDIR/phpbb3backup-$FileRevision.tgz")
+	{
+		my $NewVersion = $FileRevision + 1;
+		rename("$BACKUPDIR/phpbb3backup-$FileRevision.tgz", "$BACKUPDIR/phpbb3backup-$NewVersion.tgz");
+	}
+	$FileRevision -= 1;
 }
-if (-f "$BACKUPDIR/phpbb3backup-3.tgz")
-{
-	rename("$BACKUPDIR/phpbb3backup-3.tgz", "$BACKUPDIR/phpbb3backup-4.tgz");
-}
-if (-f "$BACKUPDIR/phpbb3backup-2.tgz")
-{
-	rename("$BACKUPDIR/phpbb3backup-2.tgz", "$BACKUPDIR/phpbb3backup-3.tgz");
-}
-if (-f "$BACKUPDIR/phpbb3backup-1.tgz")
-{
-	rename("$BACKUPDIR/phpbb3backup-1.tgz", "$BACKUPDIR/phpbb3backup-2.tgz");
-}
+
 print "Done\nCreating New Backup: ";
 system("$TARCMD $BACKUPDIR/phpbb3backup-1.tgz $MTDIR");
 print "Done\nMoving Existing MySQL data: ";
-if (-f "$BACKUPDIR/phpbb3backup.sql-5")
+if (-f "$BACKUPDIR/phpbb3backup.mysql-5")
 {
-	unlink("$BACKUPDIR/phpbb3backup.sql-5")  or warn "Could not unlink $BACKUPDIR/phpbb3backup.sql-5: $!";
+	unlink("$BACKUPDIR/phpbb3backup.mysql-5") or warn "Could not unlink $BACKUPDIR/phpbb3backup.mysql-5: $!";
 }
-if (-f "$BACKUPDIR/phpbb3backup.sql-4")
+$FileRevision = 4;
+while ($FileRevision > 0)
 {
-	rename("$BACKUPDIR/phpbb3backup.sql-4", "$BACKUPDIR/phpbb3backup.sql-5");
+	if (-f "$BACKUPDIR/phpbb3backup.mysql-$FileRevision")
+	{
+		my $NewVersion = $FileRevision + 1;
+		rename("$BACKUPDIR/phpbb3backup.mysql-$FileRevision", "$BACKUPDIR/phpbb3backup.mysql-$NewVersion");
+	}
+	$FileRevision -= 1;
 }
-if (-f "$BACKUPDIR/phpbb3backup.sql-3")
-{
-	rename("$BACKUPDIR/phpbb3backup.sql-3", "$BACKUPDIR/phpbb3backup.sql-4");
-}
-if (-f "$BACKUPDIR/phpbb3backup.sql-2")
-{
-	rename("$BACKUPDIR/phpbb3backup.sql-2", "$BACKUPDIR/phpbb3backup.sql-3");
-}
-if (-f "$BACKUPDIR/phpbb3backup.sql-1")
-{
-	rename("$BACKUPDIR/phpbb3backup.sql-1", "$BACKUPDIR/phpbb3backup.sql-2");
-}
+
 DumpMysql($LATESTFILE);
 print("Done!\n");
 exit 0;

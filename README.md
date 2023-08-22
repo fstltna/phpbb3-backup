@@ -1,4 +1,4 @@
-# phpBB3 backup script (1.3.0)
+# phpBB3 backup script (1.4.0)
 Creates a backup of your phpBB3 forum and mysql data
 
 ---
