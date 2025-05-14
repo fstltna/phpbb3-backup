@@ -23,4 +23,5 @@ If you need more help visit https://phpbbhosting.retro-os.live/
 ---
 
 20250513 - Fix bug with backing up /var/www/html being hard-coded
+
 20230821 - Cleaned up the code and conditionals
