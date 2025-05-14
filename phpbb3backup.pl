@@ -1,11 +1,10 @@
 #!/usr/bin/perl
 
 # Set these for your situation
-my $MTDIR = "/var/www/html";
 my $BACKUPDIR = "/root/backups";
 my $TARCMD = "/bin/tar czf";
 my $SQLDUMPCMD = "/usr/bin/mysqldump";
-my $VERSION = "1.4.0";
+my $VERSION = "1.5.0";
 my $OPTION_FILE = "/root/.phpbackuprc";
 my $LATESTFILE = "$BACKUPDIR/phpbb3backup.mysql-1";
 my $DOSNAPSHOT = 0;
@@ -29,6 +28,7 @@ changeme
 phpbb3
 # Put the forum path here
 /var/www/html
+# Get more apps like this at https://phpbbhosting.retro-os.live/
 END_TEMPLATE
 
 # Get if they said a option
@@ -107,7 +107,7 @@ sub SnapShotFunc
 	{
 		unlink("$BACKUPDIR/snapshot.tgz");
 	}
-	system("$TARCMD $BACKUPDIR/snapshot.tgz $MTDIR > /dev/null 2>\&1");
+	system("$TARCMD $BACKUPDIR/snapshot.tgz $FORUMDIR > /dev/null 2>\&1");
 	print "\nBackup Completed.\nBacking up MYSQL data: ";
 	if (-f "$BACKUPDIR/snapshot.mysql")
 	{
@@ -180,7 +180,7 @@ while ($FileRevision > 0)
 }
 
 print "Done\nCreating New Backup: ";
-system("$TARCMD $BACKUPDIR/phpbb3backup-1.tgz $MTDIR");
+system("$TARCMD $BACKUPDIR/phpbb3backup-1.tgz $FORUMDIR");
 print "Done\nMoving Existing MySQL data: ";
 if (-f "$BACKUPDIR/phpbb3backup.mysql-5")
 {
