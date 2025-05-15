@@ -1,4 +1,4 @@
-# phpBB3 backup script (1.5.0)
+# phpBB3 backup script (1.5.1)
 Creates a backup of your phpBB3 forum and mysql data
 
 ---
@@ -16,11 +16,13 @@ Creates a backup of your phpBB3 forum and mysql data
 
 6. If you want to edit the preferences use the "-prefs" command option
 
-If you need more help visit https://phpbbhosting.retro-os.live/
+If you need more help visit https://phpbbhosting.retro-os.live/support
 
 # Change Log
 
 ---
+
+20250515 - Update the support link
 
 20250513 - Fix bug with backing up /var/www/html being hard-coded
 
